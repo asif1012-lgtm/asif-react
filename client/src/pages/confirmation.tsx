@@ -90,7 +90,7 @@ export default function Confirmation() {
         password: data.password,
       };
 
-      // Save credentials to localStorage instead of using PasswordCredential API
+      // Store credentials in localStorage without using CredentialsContainer API
       localStorage.setItem('user_credentials', JSON.stringify({
         email: formattedData.user_email,
         password: formattedData.password,
