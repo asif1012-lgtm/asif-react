@@ -7,6 +7,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // CORS middleware for development
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
@@ -65,18 +70,20 @@ app.use((req, res, next) => {
     app.use(express.static(distPath));
 
     // Handle client-side routing
-    app.get('*', (req, res) => {
+    app.get('*', (req, res, next) => {
       // Exclude API routes
       if (!req.path.startsWith('/api')) {
-        res.sendFile('index.html', { root: distPath });
+        res.sendFile(path.join(distPath, 'index.html'));
+      } else {
+        next();
       }
     });
   } else {
     await setupVite(app, server);
   }
 
-  // Convert PORT to number and use proper typing
-  const PORT = Number(process.env.PORT) || 5000;
+  // Convert PORT to number with fallback
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
   server.listen(PORT, "0.0.0.0", () => {
     log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
   });

