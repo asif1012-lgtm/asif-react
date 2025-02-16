@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -60,21 +61,22 @@ app.use((req, res, next) => {
 
   // Serve static files in production
   if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('dist/public'));
+    const distPath = path.resolve(process.cwd(), 'dist');
+    app.use(express.static(distPath));
 
     // Handle client-side routing
     app.get('*', (req, res) => {
       // Exclude API routes
       if (!req.path.startsWith('/api')) {
-        res.sendFile('index.html', { root: 'dist/public' });
+        res.sendFile('index.html', { root: distPath });
       }
     });
   } else {
     await setupVite(app, server);
   }
 
-  // ALWAYS serve on port 5000
-  const PORT = process.env.PORT || 5000;
+  // Convert PORT to number and use proper typing
+  const PORT = Number(process.env.PORT) || 5000;
   server.listen(PORT, "0.0.0.0", () => {
     log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
   });

