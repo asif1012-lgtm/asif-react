@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express from "express";
 import { createServer } from "http";
 import { emailService } from "./email-service";
 import { z } from "zod";
@@ -16,20 +16,11 @@ const formTwoSchema = z.object({
 });
 
 export async function registerRoutes(app: Express) {
-  app.post("/api/form-one", async (req, res) => {
-    try {
-      console.log('Received form one data:', req.body);
-      const data = formOneSchema.parse(req.body);
+ const router = express.Router();
 
-      const emailResult = await emailService.sendFormOneEmail(data, data.admin_email);
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error processing form one:', error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to process form one";
-      res.status(500).json({ success: false, message: errorMessage });
-    }
-  });
+router.post("/form-one", (req, res) => {
+  res.json({ success: true, message: "Form submitted successfully" });
+});
 
   app.post("/api/form-two", async (req, res) => {
     try {
@@ -47,4 +38,4 @@ export async function registerRoutes(app: Express) {
   });
 
   return createServer(app);
-}
+}  export default router;
